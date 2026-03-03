@@ -9,6 +9,10 @@ import astronomy as astro
 
 app = FastAPI(title="Night Sky API", version="2.0")
 
+# serve the compiled frontend (built by root Dockerfile) from /static
+from fastapi.staticfiles import StaticFiles
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
