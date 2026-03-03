@@ -9,9 +9,10 @@ import astronomy as astro
 
 app = FastAPI(title="Night Sky API", version="2.0")
 
-# serve the compiled frontend (built by root Dockerfile) from /static
-from fastapi.staticfiles import StaticFiles
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+# NOTE: the frontend static mount needs to come *after* API route definitions,
+# otherwise requests like /api/health will be caught by StaticFiles and return
+# a 404.  We'll mount at the bottom of the file instead.
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -37,4 +38,12 @@ def get_capitals():
 
 @app.get("/api/health")
 def health():
+    """Simple health check used by Render and other hosts."""
     return {"status": "ok", "stars": len(astro.STARS)}
+
+# after all API routes we mount the SPA so it doesn't intercept /api/*
+from fastapi.staticfiles import StaticFiles
+# `check_dir=False` prevents FastAPI from raising if the directory
+# doesn't exist yet (e.g. during build time).  Render will have the files
+# after the multi-stage build copies them in.
+app.mount("/", StaticFiles(directory="static", html=True, check_dir=False), name="static")
