@@ -121,6 +121,18 @@ services:
       - backend
 ```
 
+When using the root Dockerfile directly you can specify a listening port via the `PORT`
+environment variable (Render sets this automatically and commonly uses 10000):
+
+```bash
+# local test, default port is 8000
+docker build -t celestia-all .
+docker run -e PORT=8000 -p 8000:8000 celestia-all
+```
+
+The container command honors `${PORT:-8000}` so it will bind correctly on Render
+without further changes.
+
 ```bash
 docker-compose up --build
 ```
